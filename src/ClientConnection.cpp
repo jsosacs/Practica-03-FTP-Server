@@ -8,7 +8,6 @@
 //****************************************************************************
 
 
-#define _GNU_SOURCE
 #include <cstring>
 #include <cstdarg>
 #include <cstdio>
@@ -91,6 +90,7 @@ int connect_TCP( uint32_t address,  uint16_t  port) {
 	if(connect( fd, (struct sockaddr * )& sin, sizeof(sin)) < 0) {
 		errexit("ERROR %s: Can't connect with socket", strerror(errno));
 	}
+	
 	return fd; // You must return the socket descriptor.
 }
 
@@ -169,7 +169,7 @@ void ClientConnection::WaitForRequests() {
 				uint16_t port = sin.sin_port;
 				p1 = port >> 8;
 				p2 = port && 0xFF;
-				fprintf(fd, "227 Entering Passive Mode (127,0,0,1,%d,%d)", &p1, &p2);
+				fprintf(fd, "227 Entering Passive Mode (127,0,0,1,%d,%d)", p1, p2);
 				fflush(fd);
 				data_socket = accept(newSocket, reinterpret_cast<sockaddr*>(&sin), &slen);
 			}

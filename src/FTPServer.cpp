@@ -32,9 +32,28 @@
 
 int define_socket_TCP(int port) {
    // Include the code for defining the socket.
-  
-  
-   return -1;
+    struct sockaddr_in sin;
+    int fd;
+    fd = socket(AF_INET, SOCK_STREAM, 0); 
+    if(fd < 0){
+        errexit("ERROR %s: Can't create the socket", strerror(errno));
+    }
+
+    memset(&sin, 0, sizeof(sin));
+
+    sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = INADDR_ANY;
+    sin.sin_port = htons(port);
+
+    if(bind(fd, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
+        errexit("ERROR %s: Can't bind with socket", strerror(errno));
+    }
+
+    if (listen(fd, 5) < 0) {
+        errexit("ERROR %s: listen failed", strerror(errno));
+    }
+
+   return fd;
 }
 
 
