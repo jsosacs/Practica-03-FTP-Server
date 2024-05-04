@@ -72,10 +72,25 @@ ClientConnection::~ClientConnection() {
 
 
 int connect_TCP( uint32_t address,  uint16_t  port) {
-     // Implement your code to define a socket here
+	// Implement your code to define a socket here
+	struct sockaddr_in sin;
+	int fd;
+	// SOCK_STREAM used for TCP, SOCK_DGRAM used for UDP
+	fd = socket(AF_INET, SOCK_STREAM, 0);
 
-    return -1; // You must return the socket descriptor.
+	if( fd < 0 ) {
+		errexit("ERROR %s: Can't create the socket", strerror(errno));
+	}
 
+	memset(&sin, 0, sizeof(sin));
+	sin.sin_family = AF_INET;
+	sin.sin_addr.s_addr = address;
+	sin.sin_port = htons(port);
+
+	if(connect( fd, (struct sockaddr * )& sin, sizeof(sin)) < 0) {
+		errexit("ERROR %s: Can't connect with socket", strerror(errno));
+	}
+	return fd; // You must return the socket descriptor.
 }
 
 
