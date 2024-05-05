@@ -170,7 +170,7 @@ void ClientConnection::WaitForRequests() {
 				uint16_t port = sin.sin_port;
 				p1 = port >> 8;
 				p2 = port & 0xFF;
-				fprintf(fd, "227 Entering Passive Mode (127,0,0,1,%d,%d)\n", p1, p2);
+				fprintf(fd, "227 Entering Passive Mode (127,0,0,1,%d,%d).\n", p2,p1);
 				fflush(fd);
 				data_socket = accept(newSocket, reinterpret_cast<sockaddr*>(&sin), &slen);
 			}
