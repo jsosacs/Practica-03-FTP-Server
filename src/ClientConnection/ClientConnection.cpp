@@ -30,10 +30,10 @@
 #include <iostream>
 #include <dirent.h>
 
-#include "common.h"
+#include "../Tools/common.h"
 
 #include "ClientConnection.h"
-#include "FTPServer.h"
+#include "../Server/FTPServer.h"
 
 
 

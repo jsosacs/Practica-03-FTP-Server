@@ -25,9 +25,9 @@
 
 #include <list>
 
-#include "common.h"
+#include "../Tools/common.h"
 #include "FTPServer.h"
-#include "ClientConnection.h"
+#include "../ClientConnection/ClientConnection.h"
 
 
 int define_socket_TCP(int port) {

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <signal.h>
 
-#include "FTPServer.h"
+#include "Server/FTPServer.h"
 
 FTPServer *server;
 

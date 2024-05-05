@@ -4,7 +4,7 @@
 #include <list>
 
 
-#include "ClientConnection.h"
+#include "../ClientConnection/ClientConnection.h"
 
 int define_socket_TCP(int port);
 
