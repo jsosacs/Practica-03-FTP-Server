@@ -154,8 +154,9 @@ void ClientConnection::WaitForRequests() {
 			else if (COMMAND("PORT")) {
 				int h1, h2, h3, h4, p1, p2;
 				fscanf(fd, "%d,%d,%d,%d,%d,%d", &h1, &h2, &h3, &h4, &p1, &p2);
-				uint32_t address = h4 << 24 || h3 << 16 || h2 << 8 || h1;
-				uint16_t port = connect_TCP(address, port);
+				uint32_t address = h4 << 24 | h3 << 16 | h2 << 8 | h1;
+				uint16_t port = p1 << 8 | p2;
+				data_socket = connect_TCP(address, port);
 				fprintf(fd, "200 OK\n");
 			}
 			else if (COMMAND("PASV")) {
@@ -168,14 +169,15 @@ void ClientConnection::WaitForRequests() {
 				getsockname(newSocket, reinterpret_cast<sockaddr*>(&sin), &slen);
 				uint16_t port = sin.sin_port;
 				p1 = port >> 8;
-				p2 = port && 0xFF;
-				fprintf(fd, "227 Entering Passive Mode (127,0,0,1,%d,%d)", p1, p2);
+				p2 = port & 0xFF;
+				fprintf(fd, "227 Entering Passive Mode (127,0,0,1,%d,%d)\n", p1, p2);
 				fflush(fd);
 				data_socket = accept(newSocket, reinterpret_cast<sockaddr*>(&sin), &slen);
 			}
 			else if (COMMAND("STOR") ) {
 				fscanf(fd, "%s", arg);
 				FILE *fp;
+				fp = fopen(arg, "wb");
 				if (fp == NULL) {
 					fprintf(fd, "553 Requested action not taken. File name not allowed.\n");
 					continue;
@@ -186,12 +188,11 @@ void ClientConnection::WaitForRequests() {
 				char buffer[bufSize];
 				int b = 2048;
 				while (b == 2048) {
-					int b = recv(data_socket, buffer, bufSize, 0);
+					b = recv(data_socket, buffer, bufSize, 0);
 					fwrite(buffer, 1, b, fp);
 				}
 
 				fprintf(fd, "226 Closing data connection\n");
-				fflush(fd);
 				close(data_socket);
 				fclose(fp);
 			}
@@ -209,16 +210,13 @@ void ClientConnection::WaitForRequests() {
 				char buffer[bufSize];
 				int b = 2048;
 				while (b == 2048) {
-					int b = fread(buffer, 1, bufSize, fp);
+					b = fread(buffer, 1, bufSize, fp);
 					send(data_socket, buffer, b, 0);
 				}
 
 				fprintf(fd, "226 Closing data connection\n");
-				fflush(fd);
 				close(data_socket);
 				fclose(fp);
-
-
 			}
 			else if (COMMAND("LIST")) {
 				DIR* dp;
@@ -230,7 +228,8 @@ void ClientConnection::WaitForRequests() {
 					send(data_socket, content.c_str(), content.size(), 0);
 				}
 				closedir(dp);
-				fprintf(fd, "250 List completed successfully");
+				fprintf(fd, "250 List completed successfully\n");
+				close(data_socket);
 			}
 			else if (COMMAND("SYST")) {
 				fprintf(fd, "215 UNIX Type: L8.\n");   
@@ -243,9 +242,7 @@ void ClientConnection::WaitForRequests() {
 			
 			else if (COMMAND("QUIT")) {
 				fprintf(fd, "221 Service closing control connection. Logged out if appropriate.\n");
-				close(data_socket);	
-				parar=true;
-				break;
+				stop();
 			}
 
 			else  {
